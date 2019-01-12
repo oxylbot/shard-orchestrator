@@ -21,6 +21,8 @@
     "eslint-config-recommended": "4.0.0"
   },
   "dependencies": {
-    "kubernetes-client": "^6.8.0"
+    "ioredis": "^4.3.0",
+    "kubernetes-client": "^6.8.0",
+    "zeromq": "^5.1.0"
   }
 }
