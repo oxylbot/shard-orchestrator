@@ -23,6 +23,7 @@
   "dependencies": {
     "ioredis": "^4.3.0",
     "kubernetes-client": "^6.8.0",
+    "protobufjs": "^6.8.8",
     "zeromq": "^5.1.0"
   }
 }
