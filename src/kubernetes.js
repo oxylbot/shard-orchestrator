@@ -6,16 +6,18 @@ module.exports = async () => {
 	await client.loadSpec();
 
 	const namespace = {
-		PRODUCTION: "oxyl",
-		STAGING: "oxyl-staging",
-		DEVELOPMENT: "oxyl-development"
+		production: "oxyl",
+		staging: "oxyl-staging",
+		development: "oxyl-development"
 	}[process.env.NODE_ENV];
 
 	return {
-		async getSharders() {
-			const sharders = await client.apis.apps.v1.namespaces(namespace).deployments("sharder").get();
-
-			return sharders;
+		async scale(replicas) {
+			return await client.apis.apps.v1
+				.namespaces(namespace)
+				.statefulsets("sharder-deployment")
+				.status
+				.patch({ replicas });
 		}
 	};
 };

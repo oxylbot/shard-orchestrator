@@ -1,8 +1,15 @@
 const path = require("path");
 const protobuf = require("protobufjs");
 
-const BucketClient = require("./BucketClient");
+const Redis = require("ioredis");
+const redis = new Redis({
+	port: +process.env.REDIS_PORT,
+	host: process.env.REDIS_HOST,
+	family: 4,
+	db: +process.env.REDIS_DATABASE
+});
 
+const BucketClient = require("./BucketClient");
 const bucketClient = new BucketClient(process.env.BUCKET_SOCKET_ADDRESS);
 
 async function init() {
@@ -13,7 +20,7 @@ async function init() {
 		rpc: rpcProto
 	});
 
-	require("./shardManager")(bucketClient);
+	require("./api")(redis, bucketClient);
 }
 
 init();
