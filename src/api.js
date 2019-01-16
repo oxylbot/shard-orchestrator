@@ -45,23 +45,23 @@ async function reshard({ url, shardCount }) {
 app.get("shards", async (req, res) => {
 	const sharding = req.app.locals.sharding;
 	if(sharding.available) {
-		const shards = await req.app.locals.redis.get(`pod:${req.body.hostname}`) ||
+		const shards = await req.app.locals.redis.get(`pod:${req.query.hostname}`) ||
 			sharding.splice(0, +process.env.SHARDS_PER_SHARDER);
 		sharding.lastStart = Date.now();
 		sharding.available = false;
 
 		res.status(200).json({
-			shardCount: sharding.shardCount,
+			shard_count: sharding.shardCount,
 			shards,
 			url: sharding.gatewayURL
 		});
 
-		sharding.waiting.delete(req.body.hostname);
-		await req.app.locals.redis.set(`pod:${req.body.hostname}`, shards);
+		sharding.waiting.delete(req.query.hostname);
+		await req.app.locals.redis.set(`pod:${req.query.hostname}`, shards);
 	} else {
-		sharding.waiting.set(req.body.hostname, true);
+		sharding.waiting.set(req.query.hostname, true);
 		res.status(429).json({
-			"retry-at": sharding.lastStart + ((6000 * +process.env.SHARDS_PER_SHARDER) * (sharding.waiting.size + 1)),
+			retry_at: sharding.lastStart + ((6000 * +process.env.SHARDS_PER_SHARDER) * (sharding.waiting.size + 1)),
 			waiting: sharding.waiting.size
 		});
 	}
