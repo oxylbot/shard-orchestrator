@@ -10,18 +10,23 @@ app.set("env", process.env.NODE_ENV);
 
 app.use(express.json());
 
+async function reshardCheck(options = {}) {
+	const { url, shards: shardCount } = await app.locals.bucket.request("GetGateway");
+
+	if(options.force || Math.round(app.locals.shardCount * options.scaleAt) <= shardCount) {
+		reshard({ url, shardCount });
+	}
+}
+
 module.exports = async (redis, bucket) => {
 	app.locals.bucket = bucket;
 	app.locals.redis = redis;
 
-	const { url, shards: shardCount } = await app.locals.bucket.request("GetGateway");
-	reshard({ url, shardCount });
+	await reshardCheck({ force: true });
 };
 
 setInterval(async () => {
-	const { url, shards: shardCount } = await app.locals.bucket.request("GetGateway");
-
-	if(Math.round(app.locals.shardCount * 1.25) <= shardCount) reshard({ url, shardCount });
+	await reshardCheck({ scaleAt: 1.25 });
 }, (1000 * 60) * 30);
 
 async function reshard({ url, shardCount }) {
