@@ -11,9 +11,13 @@ app.set("env", process.env.NODE_ENV);
 app.use(express.json());
 
 async function reshardCheck(options = {}) {
+	console.log("Reshard check", options);
 	const { url, shards: shardCount } = await app.locals.bucket.request("getGateway");
+	console.log("url", url);
+	console.log("shard count", shardCount);
 
 	if(options.force || Math.round(app.locals.shardCount * options.scaleAt) <= shardCount) {
+		console.log("Calling reshard()");
 		reshard({ url, shardCount });
 	}
 }
@@ -40,7 +44,8 @@ async function reshard({ url, shardCount }) {
 	};
 
 	await k8s.scale(0);
-	const replicas = Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER);
+	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
+	console.log("Scaling to", replicas);
 	await k8s.scale(replicas);
 
 	await app.locals.redis.set("shards", shardCount);
@@ -73,6 +78,7 @@ app.get("shards", async (req, res) => {
 });
 
 app.put("finished", async (req, res) => {
+	console.log("Sharder finished identifying", req.query);
 	const sharding = req.app.locals.sharding;
 	sharding.available = true;
 
