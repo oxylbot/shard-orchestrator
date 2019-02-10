@@ -15,7 +15,7 @@ module.exports = async (redis, bucket) => {
 	app.locals.redis = redis;
 
 	const { url, shards: shardCount } = await app.locals.bucket.request("GetGateway");
-	reshard({ url, shardCount });
+	await reshard({ url, shardCount });
 };
 
 setInterval(async () => {

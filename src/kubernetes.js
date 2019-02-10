@@ -15,7 +15,7 @@ module.exports = async () => {
 		async scale(replicas) {
 			return await client.apis.apps.v1
 				.namespaces(namespace)
-				.statefulsets("sharder-deployment")
+				.statefulsets("sharder-statefulset")
 				.status
 				.patch({ replicas });
 		}
