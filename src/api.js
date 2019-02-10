@@ -11,7 +11,7 @@ app.set("env", process.env.NODE_ENV);
 app.use(express.json());
 
 async function reshardCheck(options = {}) {
-	const { url, shards: shardCount } = await app.locals.bucket.request("GetGateway");
+	const { url, shards: shardCount } = await app.locals.bucket.request("getGateway");
 
 	if(options.force || Math.round(app.locals.shardCount * options.scaleAt) <= shardCount) {
 		reshard({ url, shardCount });
