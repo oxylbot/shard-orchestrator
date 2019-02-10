@@ -26,16 +26,22 @@ class BucketSocket {
 	rpc(method, data, callback) {
 		const id = (Date.now() + process.hrtime().reduce((a, b) => a + b)).toString(36);
 
-		const request = this.proto.rpc.lookup("Request");
-		const buffer = request.encode({
+		const buffer = this.proto.rpc.lookup("Request").encode({
 			id: id,
 			name: method.name,
 			requestType: method.requestType,
 			data: data
 		}).finish();
 
+		console.log("sent", {
+			id: id,
+			name: method.name,
+			requestType: method.requestType,
+			data: data
+		});
 		this.socket.send(buffer);
 		this.waiting.set(id, response => {
+			console.log("got resp", response);
 			this.waiting.delete(id);
 			if(response.responseType === "discord.types.HTTPError") {
 				const httpError = this.proto.discord.lookup("discord.types.HTTPError").decode(response.data);
