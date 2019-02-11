@@ -93,4 +93,4 @@ app.all("*", (req, res) => {
 	res.status(404).json({ error: "Method not found" });
 });
 
-app.listen(process.env.API_PORT);
+app.listen(process.env.SHARD_ORCHESTRATOR_SERVICE_PORT);

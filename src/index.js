@@ -3,14 +3,14 @@ const protobuf = require("protobufjs");
 
 const Redis = require("ioredis");
 const redis = new Redis({
-	port: +process.env.REDIS_PORT,
-	host: process.env.REDIS_HOST,
+	port: process.env.REDIS_SERVICE_PORT_DEALER,
+	host: "redis",
 	family: 4,
 	db: +process.env.REDIS_DATABASE
 });
 
 const BucketClient = require("./BucketClient");
-const bucketClient = new BucketClient(process.env.BUCKET_SOCKET_ADDRESS);
+const bucketClient = new BucketClient();
 
 async function init() {
 	const rpcProto = await protobuf.load(path.resolve(__dirname, "..", "protobuf", "rpcWrapper.proto"));

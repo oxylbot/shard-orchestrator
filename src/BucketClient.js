@@ -1,10 +1,9 @@
 const zmq = require("zeromq");
 
 class BucketSocket {
-	constructor(address) {
+	constructor() {
 		this.socket = zmq.socket("dealer");
 		this.socket.on("message", this.message.bind(this));
-		this.address = address;
 
 		this.service = null;
 		this.proto = null;
@@ -16,7 +15,7 @@ class BucketSocket {
 		this.service = proto.discord.lookup("DiscordAPI")
 			.create(this.rpc.bind(this), false, false);
 
-		this.socket.connect(this.address);
+		this.socket.connect(`tcp://discord-bucket-zmq-proxy:${process.env.DISCORD_BUCKET_ZMQ_PROXY_SERVICE_PORT_DEALER}`);
 	}
 
 	close() {
