@@ -6,7 +6,11 @@ const redis = new Redis({
 	port: process.env.REDIS_SERVICE_PORT_DEALER,
 	host: "redis",
 	family: 4,
-	db: +process.env.REDIS_DATABASE
+	db: +process.env.REDIS_DATABASE,
+	maxRetriesPerRequest: null,
+	reconnectOnError(error) {
+		return error.message.startsWith("connect ETIMEDOUT");
+	}
 });
 
 const BucketClient = require("./BucketClient");
