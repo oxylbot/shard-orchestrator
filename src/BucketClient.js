@@ -15,7 +15,6 @@ class BucketSocket {
 		this.service = proto.discord.lookup("DiscordAPI")
 			.create(this.rpc.bind(this), false, false);
 
-		console.log(`tcp://discord-bucket-zmq-proxy:${process.env.DISCORD_BUCKET_ZMQ_PROXY_SERVICE_PORT_ROUTER}`);
 		this.socket.connect(`tcp://discord-bucket-zmq-proxy:${process.env.DISCORD_BUCKET_ZMQ_PROXY_SERVICE_PORT_ROUTER}`);
 	}
 
@@ -33,15 +32,8 @@ class BucketSocket {
 			data: data
 		}).finish();
 
-		console.log("sent", {
-			id: id,
-			name: method.name,
-			requestType: method.requestType,
-			data: data
-		});
 		this.socket.send(buffer);
 		this.waiting.set(id, response => {
-			console.log("got resp", response);
 			this.waiting.delete(id);
 			if(response.responseType === "discord.types.HTTPError") {
 				const httpError = this.proto.discord.lookup("discord.types.HTTPError").decode(response.data);
