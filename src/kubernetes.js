@@ -13,6 +13,7 @@ module.exports = async () => {
 
 	return {
 		async scale(replicas) {
+			console.log("Scaling sharder to", replicas, "replicas");
 			return await client.apis.apps.v1
 				.namespaces(namespace)
 				.statefulsets("sharder")
