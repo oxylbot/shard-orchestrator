@@ -46,7 +46,8 @@ async function reshard({ url, shardCount }) {
 
 	await k8s.scale(0);
 	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
-	await k8s.scale(replicas);
+	const epic = await k8s.scale(replicas);
+	console.log(epic);
 
 	await app.locals.redis.set("shards", shardCount);
 	await app.locals.redis.set("replicas", replicas);
