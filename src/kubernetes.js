@@ -1,15 +1,15 @@
 const Client = require("kubernetes-client").Client;
 const config = require("kubernetes-client").config;
 
+const namespace = {
+	production: "oxyl",
+	staging: "oxyl-staging",
+	development: "oxyl-development"
+}[process.env.NODE_ENV];
+
 module.exports = async () => {
 	const client = new Client({ config: config.getInCluster() });
 	await client.loadSpec();
-
-	const namespace = {
-		production: "oxyl",
-		staging: "oxyl-staging",
-		development: "oxyl-development"
-	}[process.env.NODE_ENV];
 
 	return {
 		async scale(replicas) {
@@ -17,7 +17,7 @@ module.exports = async () => {
 				.namespaces(namespace)
 				.statefulsets("sharder")
 				.status
-				.patch({ replicas });
+				.patch({ body: { spec: { replicas } } });
 		}
 	};
 };
