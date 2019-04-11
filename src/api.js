@@ -36,7 +36,7 @@ setInterval(async () => {
 async function reshard({ url, shardCount }) {
 	console.log("Resharding!");
 	app.locals.sharding = {
-		shardCount,
+		shardCount: 0,
 		shardsAvailable: Array.from({ length: shardCount }, (value, i) => i),
 		gatewayURL: url,
 		waiting: new Map(),

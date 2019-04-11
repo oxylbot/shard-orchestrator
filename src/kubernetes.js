@@ -9,7 +9,6 @@ const namespace = {
 
 module.exports = async () => {
 	const client = new Client({ config: config.getInCluster() });
-	await client.loadSpec();
 
 	return {
 		async scale(replicas) {
