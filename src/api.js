@@ -26,6 +26,15 @@ module.exports = async (redis, bucket) => {
 	app.locals.redis = redis;
 	k8s = await kubernetes();
 
+	app.locals.sharding = {
+		shardCount: 0,
+		shardsAvailable: [],
+		gatewayURL: null,
+		waiting: new Map(),
+		lastStart: -1,
+		available: false
+	};
+
 	await reshardCheck({ force: true });
 };
 
@@ -35,19 +44,20 @@ setInterval(async () => {
 
 async function reshard({ url, shardCount }) {
 	console.log("Resharding!");
+
+	if(app.locals.sharding.shardCount !== 0) await k8s.scale(0);
+	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
+	const epic = await k8s.scale(replicas);
+	console.log(epic);
+
 	app.locals.sharding = {
-		shardCount: 0,
+		shardCount,
 		shardsAvailable: Array.from({ length: shardCount }, (value, i) => i),
 		gatewayURL: url,
 		waiting: new Map(),
 		lastStart: -1,
 		available: true
 	};
-
-	await k8s.scale(0);
-	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
-	const epic = await k8s.scale(replicas);
-	console.log(epic);
 
 	await app.locals.redis.set("shards", shardCount);
 	await app.locals.redis.set("replicas", replicas);
