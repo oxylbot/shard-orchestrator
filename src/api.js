@@ -12,9 +12,7 @@ app.set("env", process.env.NODE_ENV);
 app.use(express.json());
 
 async function reshardCheck(options = {}) {
-	console.log("Checking for a reshard...");
 	const { url, shards: shardCount } = await app.locals.bucket.request("getGateway");
-	console.log("Recommened shards:", shardCount);
 
 	if(options.force || Math.round(app.locals.shardCount * options.scaleAt) <= shardCount) {
 		reshard({ url, shardCount });
@@ -43,12 +41,9 @@ setInterval(async () => {
 }, (1000 * 60) * 30);
 
 async function reshard({ url, shardCount }) {
-	console.log("Resharding!");
-
 	if(app.locals.sharding.shardCount !== 0) await k8s.scale(0);
 	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
-	const epic = await k8s.scale(replicas);
-	console.log(epic);
+	await k8s.scale(replicas);
 
 	app.locals.sharding = {
 		shardCount,
