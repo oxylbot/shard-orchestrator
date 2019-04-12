@@ -62,7 +62,7 @@ app.get("/shards", async (req, res) => {
 	const sharding = req.app.locals.sharding;
 	if(sharding.available) {
 		const shards = await req.app.locals.redis.get(`pod:${req.query.hostname}`) ||
-			sharding.splice(0, +process.env.SHARDS_PER_SHARDER);
+			sharding.shardsAvailable.splice(0, +process.env.SHARDS_PER_SHARDER);
 		sharding.lastStart = Date.now();
 		sharding.available = false;
 
