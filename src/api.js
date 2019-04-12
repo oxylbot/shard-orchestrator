@@ -91,6 +91,7 @@ app.put("finished", async (req, res) => {
 });
 
 app.all("*", (req, res) => {
+	console.log("Unkown endpoint. Request:", req);
 	res.status(404).json({ error: "Method not found" });
 });
 
