@@ -8,7 +8,7 @@ const namespace = {
 }[process.env.NODE_ENV];
 
 module.exports = async () => {
-	const client = new Client({ config: config.getInCluster(), version: "1.13" });
+	const client = new Client({ config: config.getInCluster() });
 	await client.loadSpec();
 
 	return {
