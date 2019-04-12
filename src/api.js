@@ -58,7 +58,7 @@ async function reshard({ url, shardCount }) {
 	await app.locals.redis.set("replicas", replicas);
 }
 
-app.get("shards", async (req, res) => {
+app.get("/shards", async (req, res) => {
 	const sharding = req.app.locals.sharding;
 	if(sharding.available) {
 		const shards = await req.app.locals.redis.get(`pod:${req.query.hostname}`) ||
@@ -83,7 +83,7 @@ app.get("shards", async (req, res) => {
 	}
 });
 
-app.put("finished", async (req, res) => {
+app.put("/finished", async (req, res) => {
 	const sharding = req.app.locals.sharding;
 	sharding.available = true;
 
@@ -91,7 +91,6 @@ app.put("finished", async (req, res) => {
 });
 
 app.all("*", (req, res) => {
-	console.log("Unkown endpoint. Request:", req);
 	res.status(404).json({ error: "Method not found" });
 });
 
