@@ -13,6 +13,12 @@ const redis = new Redis({
 	}
 });
 
+redis.on("error", error => {
+	if(error.message.startsWith("connect ETIMEDOUT")) {
+		redis.connect();
+	}
+});
+
 const BucketClient = require("./BucketClient");
 const bucketClient = new BucketClient();
 
