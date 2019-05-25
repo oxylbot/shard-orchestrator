@@ -23,7 +23,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "ioredis": "^4.9.3",
-    "kubernetes-client": "^7.0.1",
+    "kubernetes-client": "^8.0.0",
     "protobufjs": "^6.8.8",
     "zeromq": "^5.1.0"
   }
