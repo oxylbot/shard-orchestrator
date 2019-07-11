@@ -65,8 +65,16 @@ app.get("/shards", async (req, res) => {
 	console.log("Sharding", sharding);
 	if(sharding.available) {
 		console.log("Shards are available");
-		const shards = await req.app.locals.redis.get(`pod:${req.query.hostname}`) ||
+		const cachedShards = await req.app.locals.redis.has(`pod:${req.query.hostname}`);
+		if(sharding.shardsAvailable.length === 0 && !cachedShards) {
+			res.status(400).json({ error: "All shards are being used" });
+			return;
+		}
+
+		const shards = cachedShards ?
+			JSON.parse(await req.app.locals.redis.get(`pod:${req.query.hostname}`)) :
 			sharding.shardsAvailable.splice(0, +process.env.SHARDS_PER_SHARDER);
+
 		console.log("Shards to give", shards);
 		sharding.lastStart = Date.now();
 		sharding.available = false;
@@ -78,7 +86,7 @@ app.get("/shards", async (req, res) => {
 		});
 
 		sharding.waiting.delete(req.query.hostname);
-		await req.app.locals.redis.set(`pod:${req.query.hostname}`, shards);
+		await req.app.locals.redis.set(`pod:${req.query.hostname}`, JSON.stringify(shards));
 	} else {
 		sharding.waiting.set(req.query.hostname, true);
 		console.log("Time to wait!");
@@ -90,7 +98,7 @@ app.get("/shards", async (req, res) => {
 });
 
 app.put("/finished", async (req, res) => {
-	console.log(req.query.hostname, "is finished");
+	console.log(req.body.hostname, "is finished");
 	const sharding = req.app.locals.sharding;
 	sharding.available = true;
 
