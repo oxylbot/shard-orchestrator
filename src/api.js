@@ -65,7 +65,7 @@ app.get("/shards", async (req, res) => {
 	console.log("Sharding", sharding);
 	if(sharding.available) {
 		console.log("Shards are available");
-		const cachedShards = await req.app.locals.redis.has(`pod:${req.query.hostname}`);
+		const cachedShards = await req.app.locals.redis.exists(`pod:${req.query.hostname}`);
 		if(sharding.shardsAvailable.length === 0 && !cachedShards) {
 			res.status(400).json({ error: "All shards are being used" });
 			return;
