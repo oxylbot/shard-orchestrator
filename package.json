@@ -1,6 +1,6 @@
 {
   "name": "shard-orchestrator",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "automatically spawns sharder processes as necessary",
   "main": "src/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/oxylbot/shard-orchestrator#readme",
   "devDependencies": {
-    "eslint": "6.8.0",
+    "eslint": "7.0.0",
     "eslint-config-recommended": "4.0.0"
   },
   "dependencies": {
