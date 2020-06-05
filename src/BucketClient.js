@@ -1,9 +1,9 @@
-const zmq = require("zeromq");
+const { Dealer } = require("zeromq");
 
 class BucketSocket {
 	constructor() {
-		this.socket = zmq.socket("dealer");
-		this.socket.on("message", this.message.bind(this));
+		this.socket = new Dealer();
+		this.messageHandler();
 
 		this.service = null;
 		this.proto = null;
@@ -53,11 +53,14 @@ class BucketSocket {
 		return await this.service[type](data);
 	}
 
-	message(message) {
-		const response = this.proto.rpc.lookup("Response");
-		const decoded = response.decode(message);
+	async messageHandler() {
+		while(!this.socket.closed) {
+			const [message] = await this.socket.receive();
+			const response = this.proto.rpc.lookup("Response");
+			const decoded = response.decode(message);
 
-		if(this.waiting.has(decoded.id)) this.waiting.get(decoded.id)(decoded);
+			if(this.waiting.has(decoded.id)) this.waiting.get(decoded.id)(decoded);
+		}
 	}
 }
 
