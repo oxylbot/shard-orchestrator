@@ -19,9 +19,8 @@ async function reshardCheck(options = {}) {
 	}
 }
 
-module.exports = async (redis, bucket) => {
+module.exports = async bucket => {
 	app.locals.bucket = bucket;
-	app.locals.redis = redis;
 	k8s = await kubernetes();
 
 	await reshardCheck({ force: true });
@@ -38,7 +37,6 @@ async function reshard({ url, shardCount, maxConcurrency }) {
 
 	app.locals.sharding = {
 		shardCount,
-		shardsAvailable: Array.from({ length: shardCount }, (value, i) => i),
 		gatewayURL: url,
 		waiting: new Map(),
 		lastStart: -1,
@@ -47,25 +45,21 @@ async function reshard({ url, shardCount, maxConcurrency }) {
 	};
 
 	console.log("Resharded with", shardCount, "shards at", replicas, "replicas");
-	await app.locals.redis.set("shards", shardCount);
-	await app.locals.redis.set("replicas", replicas);
 }
 
 app.get("/shards", async (req, res) => {
 	const sharding = req.app.locals.sharding;
 	console.log(req.query.hostname, "is trying to get shards");
-	console.log("Sharding", sharding);
+
 	if(sharding.available > 0) {
 		console.log("Shards are available");
-		const cachedShards = await req.app.locals.redis.exists(`pod:${req.query.hostname}`);
-		if(sharding.shardsAvailable.length === 0 && !cachedShards) {
-			res.status(400).json({ error: "All shards are being used" });
-			return;
-		}
 
-		const shards = cachedShards ?
-			JSON.parse(await req.app.locals.redis.get(`pod:${req.query.hostname}`)) :
-			sharding.shardsAvailable.splice(0, +process.env.SHARDS_PER_SHARDER);
+		const sharderNumber = Number(req.query.hostname.split("-")[1]);
+
+		const start = +process.env.SHARDS_PER_SHARDER * sharderNumber;
+		let end = +process.env.SHARDS_PER_SHARDER * (sharderNumber + 1);
+		if(end > sharding.shardCount) end = sharding.shardCount;
+		const shards = Array.from({ length: end - start }, (val, i) => start + i);
 
 		console.log("Shards to give", shards);
 		sharding.lastStart = Date.now();
@@ -78,14 +72,14 @@ app.get("/shards", async (req, res) => {
 		});
 
 		sharding.waiting.delete(req.query.hostname);
-		await req.app.locals.redis.set(`pod:${req.query.hostname}`, JSON.stringify(shards));
 		setTimeout(() => sharding.available += 1, 5000);
 	} else {
 		sharding.waiting.set(req.query.hostname, true);
 		console.log("Time to wait!");
 
 		const extraTime = ((5000 / sharding.maxConcurrency) * +process.env.SHARDS_PER_SHARDER) *
-							(sharding.waiting.size + 1);
+			(sharding.waiting.size + 1);
+
 		res.status(429).json({
 			retry_at: sharding.lastStart + extraTime,
 			waiting: sharding.waiting.size

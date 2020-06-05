@@ -1,24 +1,6 @@
 const path = require("path");
 const protobuf = require("protobufjs");
 
-const Redis = require("ioredis");
-const redis = new Redis({
-	port: process.env.REDIS_SERVICE_PORT_DEALER,
-	host: "redis",
-	family: 4,
-	db: +process.env.REDIS_DATABASE,
-	maxRetriesPerRequest: null,
-	reconnectOnError(error) {
-		return error.message.startsWith("connect ETIMEDOUT");
-	}
-});
-
-redis.on("error", error => {
-	if(error.message.startsWith("connect ETIMEDOUT")) {
-		redis.connect();
-	}
-});
-
 const BucketClient = require("./BucketClient");
 const bucketClient = new BucketClient();
 
@@ -30,7 +12,7 @@ async function init() {
 		rpc: rpcProto
 	});
 
-	require("./api")(redis, bucketClient);
+	require("./api")(bucketClient);
 }
 
 init();
