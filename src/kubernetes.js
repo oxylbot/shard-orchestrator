@@ -38,7 +38,7 @@ module.exports = async () => {
 							},
 							ports: [{
 								name: "http",
-								port: process.env.SHARDER_API_PORT,
+								port: +process.env.SHARDER_API_PORT,
 								protocol: "TCP"
 							}]
 						}
