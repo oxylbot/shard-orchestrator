@@ -12,7 +12,7 @@ async function init() {
 		rpc: rpcProto
 	});
 
-	require("./api")(bucketClient);
+	require("./rest")(bucketClient);
 }
 
 init();

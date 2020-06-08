@@ -1,5 +1,6 @@
 const express = require("express");
 const kubernetes = require("./kubernetes");
+const superagent = require("superagent");
 let k8s;
 
 const app = express();
@@ -85,6 +86,23 @@ app.get("/shards", async (req, res) => {
 			waiting: sharding.waiting.size
 		});
 	}
+});
+
+app.get("/request-guild-members", async (req, res) => {
+	const sharding = req.app.locals.sharding;
+	const shard = (req.query.id >> 22) % sharding.shardCount;
+	const sharderNumber = Math.floor(shard / +process.env.SHARDS_PER_SHARDER);
+
+	const result = await superagent
+		.get(`http://sharder-${sharderNumber}:${process.env.SHARDER_API_PORT}/request-guild-members`)
+		.query({
+			id: req.query.id,
+			query: req.query.query,
+			userIds: req.query.userIds
+		})
+		.ok(() => true);
+
+	return res.status(result.status).json(result.body);
 });
 
 app.all("*", (req, res) => {

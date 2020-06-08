@@ -9,7 +9,7 @@ module.exports = async () => {
 	return {
 		async scale(replicas) {
 			replicaCount = replicas;
-			for(let i = replicaCount; i < replicas; i++) this.createService(i);
+			for(let i = replicaCount; i < replicas; i++) await this.createService(i);
 
 			await client.apis.apps.v1
 				.namespaces(process.env.NAMESPACE)
