@@ -1,6 +1,6 @@
 {
   "name": "shard-orchestrator",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "automatically spawns sharder processes as necessary",
   "main": "src/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "eslint-config-recommended": "4.1.0"
   },
   "dependencies": {
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "kubernetes-client": "^9.0.0",
     "protobufjs": "^6.8.8",
     "superagent": "^5.2.2",
