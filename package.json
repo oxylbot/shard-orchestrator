@@ -1,6 +1,6 @@
 {
   "name": "shard-orchestrator",
-  "version": "6.0.0",
+  "version": "7.0.0",
   "description": "automatically spawns sharder processes as necessary",
   "main": "src/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "kubernetes-client": "^9.0.0",
-    "protobufjs": "^6.8.8",
+    "protobufjs": "^6.9.0",
     "superagent": "^5.2.2",
     "zeromq": "^6.0.0-beta.6"
   }
