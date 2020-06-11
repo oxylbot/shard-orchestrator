@@ -1,8 +1,7 @@
 const Client = require("kubernetes-client").Client;
-const config = require("kubernetes-client").config;
 
 module.exports = async () => {
-	const client = new Client({ config: config.getInCluster() });
+	const client = new Client();
 	await client.loadSpec();
 
 	let replicaCount = 0;
