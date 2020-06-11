@@ -27,7 +27,7 @@ module.exports = async () => {
 					body: {
 						apiVersion: "v1",
 						kind: "Service",
-						meta: {
+						metadata: {
 							name: app,
 							namespace: process.env.NAMESPACE
 						},
