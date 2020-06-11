@@ -5,9 +5,9 @@ module.exports = async () => {
 	await client.loadSpec();
 
 	let replicaCount = 0;
-	return {
+	const functions = {
 		async scale(replicas) {
-			for(let i = replicaCount; i < replicas; i++) await module.exports.createService(i);
+			for(let i = replicaCount; i < replicas; i++) await functions.createSharderService(i);
 			replicaCount = replicas;
 
 			await client.apis.apps.v1
@@ -45,4 +45,6 @@ module.exports = async () => {
 				});
 		}
 	};
+
+	return functions;
 };
