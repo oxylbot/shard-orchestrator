@@ -4,7 +4,14 @@ module.exports = async () => {
 	const client = new Client();
 	await client.loadSpec();
 
-	let replicaCount = 0;
+	const statefulSet = await client.apis.apps.v1
+		.namespaces(process.env.NAMESPACE)
+		.statefulsets("sharder")
+		.status
+		.get();
+
+	let replicaCount = statefulSet.replicas;
+
 	const functions = {
 		async scale(replicas) {
 			for(let i = replicaCount; i < replicas; i++) await functions.createSharderService(i);
