@@ -7,7 +7,7 @@ module.exports = async () => {
 	let replicaCount = 0;
 	return {
 		async scale(replicas) {
-			for(let i = replicaCount; i < replicas; i++) await this.createService(i);
+			for(let i = replicaCount; i < replicas; i++) await module.exports.createService(i);
 			replicaCount = replicas;
 
 			await client.apis.apps.v1
