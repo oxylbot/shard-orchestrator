@@ -32,7 +32,7 @@ setInterval(async () => {
 }, (1000 * 60) * 30);
 
 async function reshard({ url, shardCount, maxConcurrency }) {
-	if(app.locals.sharding.shardCount !== 0) await k8s.scale(0);
+	if(app.locals.sharding && app.locals.sharding.shardCount !== 0) await k8s.scale(0);
 	const replicas = Math.max(Math.ceil(shardCount / +process.env.SHARDS_PER_SHARDER), 1);
 	await k8s.scale(replicas);
 
