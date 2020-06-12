@@ -10,8 +10,7 @@ module.exports = async () => {
 		.status
 		.get();
 
-	console.log("Stateful set", statefulSet);
-	let replicaCount = statefulSet.replicas;
+	let replicaCount = statefulSet.body.status.replicas;
 
 	const functions = {
 		async scale(replicas) {
