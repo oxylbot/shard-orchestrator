@@ -11,6 +11,7 @@ module.exports = async () => {
 		.get();
 
 	let replicaCount = statefulSet.body.status.replicas;
+	console.log("Replicas", replicaCount);
 
 	const functions = {
 		async scale(replicas) {
@@ -26,6 +27,7 @@ module.exports = async () => {
 		},
 		async createSharderService(target) {
 			const app = `sharder-${target}`;
+			console.log("Creating service for", app);
 
 			await client.api.v1
 				.namespaces(process.env.NAMESPACE)
