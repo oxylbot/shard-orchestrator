@@ -11,13 +11,12 @@ module.exports = async () => {
 		.get();
 
 	console.log("Stateful set", statefulSet);
-	let replicaCount = statefulSet.body.status.replicas;
-	console.log("Replicas", replicaCount);
+	let serviceCount = statefulSet.body.status.replicas;
+	console.log("Services created", serviceCount);
 
 	const functions = {
 		async scale(replicas) {
-			for(let i = replicaCount; i < replicas; i++) await functions.createSharderService(i);
-			replicaCount = replicas;
+			for(let i = serviceCount; i < replicas; i++) await functions.createSharderService(i);
 
 			await client.apis.apps.v1
 				.namespaces(process.env.NAMESPACE)
@@ -28,6 +27,7 @@ module.exports = async () => {
 		},
 		async createSharderService(target) {
 			const app = `sharder-${target}`;
+			serviceCount++;
 			console.log("Creating service for", app);
 
 			await client.api.v1
