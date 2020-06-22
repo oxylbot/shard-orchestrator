@@ -1,5 +1,7 @@
 const express = require("express");
+const expressWinston = require("express-winston");
 const kubernetes = require("./kubernetes");
+const logger = require("../logger");
 const superagent = require("superagent");
 let k8s;
 
@@ -11,6 +13,7 @@ app.disable("x-powered-by");
 app.set("env", process.env.NODE_ENV);
 
 app.use(express.json());
+app.use(expressWinston.logger({ winstonInstance: logger }));
 
 async function reshardCheck(options = {}) {
 	const { url, shards: shardCount, maxConcurrency } = await app.locals.bucket.request("getGateway");
@@ -45,15 +48,15 @@ async function reshard({ url, shardCount, maxConcurrency }) {
 		maxConcurrency
 	};
 
-	console.log("Resharded with", shardCount, "shards at", replicas, "replicas");
+	logger.info(`Resharded with ${shardCount} shards with ${replicas} replicas`);
 }
 
 app.get("/shards", async (req, res) => {
 	const sharding = req.app.locals.sharding;
-	console.log(req.query.hostname, "is trying to get shards");
+	logger.debug(`${req.query.hostname} is trying to get shards`);
 
 	if(sharding.available > 0) {
-		console.log("Shards are available");
+		logger.debug(`Shards are available`);
 
 		const sharderNumber = Number(req.query.hostname.split("-")[1]);
 
@@ -62,7 +65,7 @@ app.get("/shards", async (req, res) => {
 		if(end > sharding.shardCount) end = sharding.shardCount;
 		const shards = Array.from({ length: end - start }, (val, i) => start + i);
 
-		console.log("Shards to give", shards);
+		logger.debug(`Handing out ${shards}`);
 		sharding.lastStart = Date.now();
 		sharding.available -= 1;
 
@@ -76,11 +79,11 @@ app.get("/shards", async (req, res) => {
 		setTimeout(() => sharding.available += 1, 5000);
 	} else {
 		sharding.waiting.set(req.query.hostname, true);
-		console.log("Time to wait!");
 
 		const extraTime = ((5000 / sharding.maxConcurrency) * +process.env.SHARDS_PER_SHARDER) *
 			(sharding.waiting.size + 1);
 
+		logger.debug(`Ratelimiting for ${extraTime}`);
 		res.status(429).json({
 			retry_at: sharding.lastStart + extraTime,
 			waiting: sharding.waiting.size
@@ -93,6 +96,7 @@ app.get("/request-guild-members", async (req, res) => {
 	const shard = (req.query.id >> 22) % sharding.shardCount;
 	const sharderNumber = Math.floor(shard / +process.env.SHARDS_PER_SHARDER);
 
+	logger.verbose(`Requesting guild members from sharder-${sharderNumber}`);
 	const result = await superagent
 		.get(`http://sharder-${sharderNumber}:${process.env.SHARDER_API_PORT}/request-guild-members`)
 		.query({
@@ -102,6 +106,7 @@ app.get("/request-guild-members", async (req, res) => {
 		})
 		.ok(() => true);
 
+	logger.verbose("Requested guild members", { members: result });
 	return res.status(result.status).json(result.body);
 });
 
@@ -109,4 +114,7 @@ app.all("*", (req, res) => {
 	res.status(404).json({ error: "Method not found" });
 });
 
-app.listen(process.env.SHARD_ORCHESTRATOR_SERVICE_PORT);
+app.use(expressWinston.errorLogger({ winstonInstance: logger }));
+app.listen(process.env.SHARD_ORCHESTRATOR_SERVICE_PORT, () => {
+	logger.info(`REST API listening on port ${process.env.SHARD_ORCHESTRATOR_SERVICE_PORT}`);
+});

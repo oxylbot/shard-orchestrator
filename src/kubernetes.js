@@ -1,4 +1,5 @@
 const Client = require("kubernetes-client").Client;
+const logger = require("./logger");
 
 module.exports = async () => {
 	const client = new Client();
@@ -10,12 +11,12 @@ module.exports = async () => {
 		.status
 		.get();
 
-	console.log("Stateful set", statefulSet);
 	let serviceCount = statefulSet.body.status.replicas;
-	console.log("Services created", serviceCount);
+	logger.info("Retrieved stateful set status", { statefulSet });
 
 	const functions = {
 		async scale(replicas) {
+			logger.info(`Scaling sharder to ${replicas}`);
 			for(let i = serviceCount; i < replicas; i++) await functions.createSharderService(i);
 
 			await client.apis.apps.v1
@@ -28,7 +29,7 @@ module.exports = async () => {
 		async createSharderService(target) {
 			const app = `sharder-${target}`;
 			serviceCount++;
-			console.log("Creating service for", app);
+			logger.info(`Creating service for ${app}`);
 
 			await client.api.v1
 				.namespaces(process.env.NAMESPACE)
