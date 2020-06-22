@@ -22,7 +22,7 @@ async function init() {
 init();
 
 process.on("unhandledRejection", error => {
-	logger.error(error.stack, { error });
+	logger.error(error.message, { error });
 
 	process.exit(1);
 });

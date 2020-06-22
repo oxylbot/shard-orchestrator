@@ -1,7 +1,7 @@
 const express = require("express");
 const expressWinston = require("express-winston");
 const kubernetes = require("./kubernetes");
-const logger = require("../logger");
+const logger = require("./logger");
 const superagent = require("superagent");
 let k8s;
 
