@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "express-winston": "^4.0.5",
+    "express-winston": "^4.2.0",
     "kubernetes-client": "^9.0.0",
     "protobufjs": "^6.10.2",
     "superagent": "^6.1.0",
