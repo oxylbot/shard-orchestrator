@@ -21,7 +21,7 @@
     "eslint-config-recommended": "4.1.0"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.19.2",
     "express-winston": "^4.0.5",
     "kubernetes-client": "^9.0.0",
     "protobufjs": "^6.10.2",
